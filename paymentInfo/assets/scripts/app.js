@@ -51,6 +51,15 @@
 
 			},
 
+			// Check that the credit card number has the correct length (ie is completely filled)
+			// for the different types of cards
+
+			isCorrectLength: function (cardNumber) {
+				var ccType = helpers.getCreditCardType(cardNumber);
+				return (ccType === "amex" && cardNumber.length === 15) ||
+					(ccType !== "amex" && cardNumber.length === 16);
+			},
+
 			// Our matchNumbers function. Probably does more than it should.
 			// Will revisit.
 
@@ -143,9 +152,8 @@
 				// four numbers of the card.
 
 				element.bind("saveValues", function () {
-
-					if ((ccType === "amex" && uvalue.length === 15) || (ccType !== "amex" && uvalue.length === 16)) {
-
+					if (helpers.isValidCreditCardNumber(uvalue)) {
+						console.log("Saving ccNumber " + uvalue + " in creditCardComplete");
 						element
 							.data("ccNumber", uvalue)
 							.val(uvalue.substr(uvalue.length - 4, uvalue.length));
@@ -351,11 +359,10 @@
 						// Is it the enter key?
 						if (e.keyCode === 13 || e.type === "blur") {
 
-							var uvalue = $(element).inputmask("unmaskedvalue"),
-								ccType = helpers.getCreditCardType(uvalue);
+							var uvalue = $(element).inputmask("unmaskedvalue");
 
 							// Make sure the number length is valid
-							if ((ccType === "amex" && uvalue.length === 15) || (ccType !== "amex" && uvalue.length === 16)) {
+							if (helpers.isCorrectLength(uvalue)) {
 								helpers.creditCardComplete();
 							}
 
