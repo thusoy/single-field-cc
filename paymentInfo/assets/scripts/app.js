@@ -70,7 +70,7 @@
 				// back to the default image and erase any credit card number we might have stored.
 
 				if (el.val() !== "") {
-					if (ccType !== "") {
+					if (ccType) {
 						$("." + opts.cardImageClass)
 							.addClass(ccType);
 					} else {
