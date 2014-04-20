@@ -51,6 +51,36 @@
 
 			},
 
+			// Check that the entered credit card number is valid according to the luhn test
+			// Ref http://en.wikipedia.org/wiki/Luhn_algorithm
+
+			luhnTest: function (cardNumber) {
+				// Precomputed sum of digits of even number * 2 (ie 2*2=4 -> 4, 6*2==12 -> 3)
+				var luhnArr = [0, 2, 4, 6, 8, 1, 3, 5, 7, 9],
+					sum = 0,
+					num,
+					temp = String(cardNumber).replace(/[^\d]/g, '');
+				if (temp.length === 0) {
+					return false;
+				}
+				for (var i = temp.length-1; i >= 0; i--) {
+					num = parseInt(temp.charAt(i), 10);
+					sum += ((temp.length - i) % 2 === 1) ? num : luhnArr[num];
+				}
+				return sum % 10 === 0;
+			},
+
+			// Check that the credit card number has the correct length for the type and that it's
+			// valid according to the Luhn test.
+
+			isValidCreditCardNumber: function (cardNumber) {
+				var validLength = helpers.isCorrectLength(cardNumber),
+					validNumber = helpers.luhnTest(cardNumber);
+
+				return validLength && validNumber;
+			},
+
+
 			// Check that the credit card number has the correct length (ie is completely filled)
 			// for the different types of cards
 
@@ -69,7 +99,7 @@
 				// grab the current value of the credit card field and then get the type
 				// of the card.
 
-				var cardNumber = el.data("ccNumber") || el.val(),
+				var cardNumber = el.val(),
 					ccType = helpers.getCreditCardType(cardNumber);
 
 				// If the credit card field has a value and we know what type of card it is,
@@ -116,7 +146,7 @@
 						.val("");
 				}
 
-				if (ccType !== undefined) {
+				if (ccType && helpers.luhnTest(cardNumber)) {
 					$(el)
 						.parents("." + opts.fieldsetClass)
 						.removeClass("invalid shake");
@@ -130,11 +160,10 @@
 
 				// We need to get the credit card field and the unmasked value of the field.
 				var element = $("." + opts.cardNumberClass),
-					uvalue = element.inputmask("unmaskedvalue"),
-					ccType = helpers.getCreditCardType(uvalue);
+					uvalue = element.inputmask("unmaskedvalue");
 
 				// Let's make sure the card is valid
-				if (ccType === undefined) {
+				if (!helpers.isValidCreditCardNumber(uvalue)) {
 					$(element)
 						.parents("." + opts.fieldsetClass)
 						.addClass("invalid shake");
